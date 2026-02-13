@@ -1,0 +1,147 @@
+---
+title: "Copper and Toxics AWQMS Review Tools"
+output: html_document
+date: "2026-02-12"
+---
+
+```{r}
+local_path ="C:/Users/cthomas/Downloads/"
+
+
+# Enter parameters for data pull
+StDate <- '2016-01-01'
+EndDate <- '2025-01-01'
+org <- 'LF_COFFINBUTTE'
+```
+
+```{r,results = 'hide', echo=FALSE, message=FALSE, this chunk spits out excel tables describing monthly results in AWQMS}
+library(shiny)
+library(shinybusy)
+library(tidyverse)
+library(lubridate)
+library(AWQMSdata)
+library(writexl) #swap me out for opexlsx if necessary
+#library(openxlsx)
+#library(openxlsx2)
+library(rmarkdown)
+library(janitor)
+library(DT)
+
+Raw_Contingency_Data_Location <- AWQMS_Data(startdate = StDate, enddate = EndDate, OrganizationID = org,
+                      filterQC = FALSE) 
+
+#combine Char_Name and Sample_Fraction to separate dissolved vs total
+Working_Contingency_Data <- Raw_Contingency_Data_Location %>% 
+  mutate(Char_and_Fraction = paste(Char_Name,Sample_Fraction, sep = ", "))
+
+combos <- Working_Contingency_Data %>%
+  distinct(MLocID, Project1)
+
+table_list <- list()
+
+for(i in seq_len(nrow(combos))) {
+  
+  site <- combos$MLocID[i]
+  proj <- combos$Project1[i]
+  
+  Filtered_Contingency_Data <- Working_Contingency_Data %>%
+    filter(MLocID == site,
+           Project1 == proj)
+
+#this table code actually does all the work
+table_data <- table(Working_Contingency_Data$Char_and_Fraction, Working_Contingency_Data$SampleStartDate)
+print_table_data <- print(table_data)
+
+table_data <- table(Filtered_Contingency_Data$Char_and_Fraction,
+                      Filtered_Contingency_Data$SampleStartDate)
+  
+  sheet_name <- paste(site, proj, sep = "_")
+  
+  table_list[[sheet_name]] <- as.data.frame.matrix(table_data) %>%
+  tibble::rownames_to_column("Char_and_Fraction")
+}
+
+
+#Preferred Export File Name
+Excel_Write_Path = paste(local_path, org, "Contingency_Table.xlsx")
+# 1) Create workbook
+wb <- wb_workbook()
+
+# 2) Define styles (ARGB hex: alpha + RGB)
+#    Light Blue:  #ADD8E6 -> FFADD8E6
+#    Light Green: #90EE90 -> FF90EE90
+#    Light Red:   Excel default light red ~ #FFC7CE -> FFFFC7CE
+
+wb$add_dxfs_style(
+  name       = "lightBlue",
+  font_color = wb_color(hex = "FF000000"),  # black font
+  bg_fill    = wb_color(hex = "FFADD8E6")   # light blue
+)
+wb$add_dxfs_style(
+  name       = "lightGreen",
+  font_color = wb_color(hex = "FF000000"),
+  bg_fill    = wb_color(hex = "FF90EE90")   # light green
+)
+wb$add_dxfs_style(
+  name       = "lightRed",
+  font_color = wb_color(hex = "FF000000"),
+  bg_fill    = wb_color(hex = "FFFFC7CE")   # light red (Excel default)
+)
+
+# 3) Add each data frame and apply CF to numeric columns (skip header row)
+for (sheet_name in names(table_list)) {
+  df <- table_list[[sheet_name]]
+
+  wb$add_worksheet(sheet = sheet_name)
+  wb$add_data(sheet = sheet_name, x = df, dims = "A1", with_col_names = TRUE)
+
+  # numeric columns only
+  num_cols <- which(vapply(df, is.numeric, logical(1)))
+  if (length(num_cols) > 0) {
+    n_rows  <- nrow(df) + 1L    # include header row in count
+    ranges  <- vapply(
+      num_cols,
+      function(j) {
+        col_letter <- int2col(j)                       # 1 -> "A", etc.
+        sprintf("%s2:%s%d", col_letter, col_letter, n_rows)  # start at row 2
+      },
+      FUN.VALUE = character(1)
+    )
+    dims_all <- paste(ranges, collapse = ",")
+
+    # Rule order matters: place the most specific/conflicting first.
+    # A) ≥ 2 → light red
+    wb$add_conditional_formatting(
+      sheet = sheet_name,
+      dims  = dims_all,
+      rule  = ">=2",
+      style = "lightRed",
+      type  = "expression"
+    )
+
+    # B) == 1 → light green
+    wb$add_conditional_formatting(
+      sheet = sheet_name,
+      dims  = dims_all,
+      rule  = "==1",
+      style = "lightGreen",
+      type  = "expression"
+    )
+
+    # C) == 0 → light blue
+    wb$add_conditional_formatting(
+      sheet = sheet_name,
+      dims  = dims_all,
+      rule  = "==0",
+      style = "lightBlue",
+      type  = "expression"
+    )
+  }
+}
+
+# 4) Save workbook
+wb_save(wb, file = Excel_Write_Path)
+
+
+```
+
