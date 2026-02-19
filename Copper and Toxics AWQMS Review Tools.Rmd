@@ -11,7 +11,7 @@ local_path ="C:/Users/cthomas/Downloads/"
 # Enter parameters for data pull
 StDate <- '2016-01-01'
 EndDate <- '2025-01-01'
-org <- 'LF_COFFINBUTTE'
+org <- 'SSSD'
 ```
 
 ```{r,results = 'hide', echo=FALSE, message=FALSE, this chunk spits out excel tables describing monthly results in AWQMS}
@@ -20,9 +20,9 @@ library(shinybusy)
 library(tidyverse)
 library(lubridate)
 library(AWQMSdata)
-library(writexl) #swap me out for opexlsx if necessary
+#library(writexl) #swap me out for opexlsx if necessary
 #library(openxlsx)
-#library(openxlsx2)
+library(openxlsx2)
 library(rmarkdown)
 library(janitor)
 library(DT)
