@@ -4,7 +4,7 @@ library(purrr)
 library(openxlsx)
 library(tidyverse)
 
-In <- "C:/Users/cthomas/OneDrive - Oregon/Desktop/combine_Arclin"
+In <- "C:/Users/cthomas/OneDrive - Oregon/Desktop/combine"
 Out <-"C:/Users/cthomas/OneDrive - Oregon/Desktop/4AWQMS_Arclin/4AWQMS_Arclin_EDD.xlsx"
 
 
