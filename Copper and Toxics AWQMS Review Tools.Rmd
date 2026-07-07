@@ -9,11 +9,15 @@ local_path ="C:/Users/cthomas/Downloads/"
 
 
 # Enter parameters for data pull
-StDate <- '2016-01-01'
-EndDate <- '2025-01-01'
-org <- 'SSSD'
+StDate <- '2021-01-01'
+EndDate <- '2026-01-01'
+org <- 'ARCLIN'
 ```
 
+
+
+
+This will attempt to pull every combination of monitoring location and project for the selected organization and date range
 ```{r,results = 'hide', echo=FALSE, message=FALSE, this chunk spits out excel tables describing monthly results in AWQMS}
 library(shiny)
 library(shinybusy)
