@@ -9,9 +9,9 @@ local_path ="C:/Users/cthomas/Downloads/"
 
 
 # Enter parameters for data pull
-StDate <- '2021-01-01'
-EndDate <- '2026-01-01'
-org <- 'ARCLIN'
+StDate <- '2023-11-07'
+EndDate <- '2023-11-09'
+org <- 'OREGONDEQ'
 ```
 
 
@@ -40,6 +40,9 @@ Working_Contingency_Data <- Raw_Contingency_Data_Location %>%
 
 combos <- Working_Contingency_Data %>%
   distinct(MLocID, Project1)
+
+#combos cheat
+#combos <- filter(combos, Project1 == "Landfill Monitoring")
 
 table_list <- list()
 

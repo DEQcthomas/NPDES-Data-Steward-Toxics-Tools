@@ -5,7 +5,10 @@ library(openxlsx)
 library(tidyverse)
 
 In <- "C:/Users/cthomas/OneDrive - Oregon/Desktop/combine"
-Out <-"C:/Users/cthomas/OneDrive - Oregon/Desktop/4AWQMS_Arclin/4AWQMS_Arclin_EDD.xlsx"
+Out <-"C:/Users/cthomas/OneDrive - Oregon/Desktop/working_area/2023_Riverbend_Landfill_Split.xlsx"
+
+#sheet number usually 1 or 6
+sheet_number <- 1
 
 
 # Define the folder path containing the .xlsx files
@@ -17,7 +20,7 @@ file_list <- list.files(path = folder_path, pattern = "*", full.names = TRUE)
 
 # Step 1: Read all Excel files and convert columns to character
 data_list <- map(file_list, ~ {
-  read_excel(.x, sheet = 1) %>%
+  read_excel(.x, sheet = sheet_number) %>%
     mutate(across(everything(), as.character))
 })
 
