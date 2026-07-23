@@ -42,7 +42,7 @@ combos <- Working_Contingency_Data %>%
   distinct(MLocID, Project1)
 
 #combos cheat
-#combos <- filter(combos, Project1 == "Landfill Monitoring")
+combos <- filter(combos, Project1 == "Landfill Monitoring")
 
 table_list <- list()
 
